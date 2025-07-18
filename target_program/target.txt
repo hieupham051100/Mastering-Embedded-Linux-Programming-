@@ -1,0 +1,25 @@
+1. tạo 1 folder : ~/linux_embeded_thay_phuan/target_program/hello-target$
+2. tạo 1 file.c: vi hello-target đơn giản vd: 
+
+#include <stdio.h>
+void hello-target(){
+printf("hello target"); 
+}
+1. chỉ complie ko link ~/linux_embeded_thay_phuan/target_program/hello-target$ aarch64-rpi3-linux-gnu-gcc -c hello_target.c -o hello_target_static.o 
+	~/linux_embeded_thay_phuan/target_program/hello-target$ aarch64-rpi3-linux-gnu-gcc -fPIC -c hello_target.c -o hello_target_share.o
+sẽ tạo ra 2 file.o **hello_target_share.o** và **hello_target_static.o** 
+2.  tại vì sao các phải complie thành các file .o vì các file này phải cùng được link 1 lần vào thư viện .so để tránh làm nhiều lần -> ghi đè file .so 
+3. linked vào thư viện tương ứng  ~/linux_embeded_thay_phuan/target_program/hello-target$ aarch64-rpi3-linux-gnu-ar rc libtest.a hello_target_static.o ( ello_target_static.o )
+	~/linux_embeded_thay_phuan/target_program/hello-target$ aarch64-rpi3-linux-gnu-gcc -shared -o libtest.so hello_target_share.o 
+	**tạo libtest.a và libtest.so**
+	tạo 1 project như sau 
+project/
+├── libs/
+│   ├── libtest.a        # static library (thư viện tĩnh)
+│   ├── libtest.so       # shared library (thư viện động)
+│   └── test.h           # header file - khai báo interface các hàm
+└── main.c               # file chính sử dụng thư viện
+
+trong test.h phải chứa prototype của libtest.c ở đây là void hello-target() (giống với việc tạo 1 file stdio.h nơi chứa scanf(),... ) 
+khi chạy câu lệnh: ~/linux_embeded_thay_phuan/target_program/test_function$ aarch64-rpi3-linux-gnu-gcc test_function.c -L../lib -ltest -I../lib -o test_function : sẽ **tạo ra file execute test_function với libtest.so** 
+~/linux_embeded_thay_phuan/target_program/test_function$ aarch64-rpi3-linux-gnu-gcc test_function.c ../lib/libtest.a -I../lib -o test_function_static : **Sẽ tạo ra file execute với libtest.a** 
